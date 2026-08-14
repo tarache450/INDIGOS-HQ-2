@@ -1,0 +1,6 @@
+{
+  "name": "Indigo HQ",
+  "description": "Private Label Operating System for Indigo Records with full-stack synchronization engine, catalog management, CRM, A&R pipeline, financial royalties, and Indigo AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

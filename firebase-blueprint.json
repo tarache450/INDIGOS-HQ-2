@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Indigo HQ staff or artist account",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["SUPER_ADMIN", "LABEL_MANAGER", "MARKETING", "A_AND_R", "FINANCE", "ARTIST"] },
+        "avatarUrl": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "displayName", "role"]
+    },
+    "Artist": {
+      "title": "Artist",
+      "description": "Music artist on Indigo Records roster",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "slug": { "type": "string", "maxLength": 128 },
+        "bio": { "type": "string", "maxLength": 2048 },
+        "photoUrl": { "type": "string", "maxLength": 512 },
+        "genres": { "type": "array" },
+        "status": { "type": "string", "enum": ["ACTIVE", "DEVELOPMENT", "ALUMNI"] },
+        "country": { "type": "string", "maxLength": 64 },
+        "monthlyListeners": { "type": "number" },
+        "externalReference": { "type": "object" }
+      },
+      "required": ["id", "name", "slug", "status"]
+    },
+    "Release": {
+      "title": "Release",
+      "description": "Indigo Records music release / catalog item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "catalogNumber": { "type": "string", "maxLength": 32 },
+        "title": { "type": "string", "maxLength": 128 },
+        "artistId": { "type": "string", "maxLength": 128 },
+        "artistName": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["SINGLE", "EP", "ALBUM", "REMIX"] },
+        "releaseDate": { "type": "string", "maxLength": 32 },
+        "status": { "type": "string", "enum": ["SCHEDULED", "RELEASED", "DRAFT", "MASTERING", "DISTRIBUTED"] },
+        "artworkUrl": { "type": "string", "maxLength": 512 },
+        "upc": { "type": "string", "maxLength": 64 },
+        "genres": { "type": "array" },
+        "externalReference": { "type": "object" }
+      },
+      "required": ["id", "catalogNumber", "title", "artistName", "status"]
+    },
+    "Track": {
+      "title": "Track",
+      "description": "Audio track belonging to a release",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "releaseId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 128 },
+        "isrc": { "type": "string", "maxLength": 64 },
+        "duration": { "type": "string", "maxLength": 16 },
+        "bpm": { "type": "number" },
+        "key": { "type": "string", "maxLength": 16 },
+        "previewAudioUrl": { "type": "string", "maxLength": 512 }
+      },
+      "required": ["id", "releaseId", "title"]
+    },
+    "Demo": {
+      "title": "Demo",
+      "description": "A&R demo submission",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "artistName": { "type": "string", "maxLength": 128 },
+        "trackTitle": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "audioUrl": { "type": "string", "maxLength": 512 },
+        "genre": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["NEW", "LISTENING", "SHORTLIST", "CONTACTED", "NEGOTIATION", "SIGNED", "REJECTED"] },
+        "score": { "type": "number" }
+      },
+      "required": ["id", "artistName", "trackTitle", "status"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Label operational task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 256 },
+        "status": { "type": "string", "enum": ["TODO", "IN_PROGRESS", "WAITING", "DONE"] },
+        "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+        "deadline": { "type": "string", "maxLength": 32 }
+      },
+      "required": ["id", "title", "status", "priority"]
+    },
+    "SyncJob": {
+      "title": "SyncJob",
+      "description": "Website & external source synchronization job",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["FULL_SYNC", "INCREMENTAL_SYNC", "ENTITY_SYNC", "DRY_RUN"] },
+        "startedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["RUNNING", "SUCCESS", "PARTIAL", "FAILED"] },
+        "recordsRead": { "type": "number" },
+        "recordsCreated": { "type": "number" },
+        "recordsUpdated": { "type": "number" }
+      },
+      "required": ["id", "type", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/artists/{artistId}": {
+      "schema": "Artist",
+      "description": "Roster artists"
+    },
+    "/releases/{releaseId}": {
+      "schema": "Release",
+      "description": "Indigo Records catalog releases"
+    },
+    "/releases/{releaseId}/tracks/{trackId}": {
+      "schema": "Track",
+      "description": "Tracks subcollection"
+    },
+    "/demos/{demoId}": {
+      "schema": "Demo",
+      "description": "A&R demo inbox items"
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Operational tasks"
+    },
+    "/sync_jobs/{jobId}": {
+      "schema": "SyncJob",
+      "description": "Synchronization logs and jobs"
+    }
+  }
+}
