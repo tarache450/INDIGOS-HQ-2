@@ -1,8 +1,11 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { createApp } from '../dist/server.cjs';
+import { apiRouter } from '../src/server/api/routes';
 
 export default function handler(req, res) {
-  createApp()(req, res);
+  const app = express();
+  app.use(express.json());
+  app.use('/api', apiRouter);
+  app(req, res);
 }
