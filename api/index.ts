@@ -1,10 +1,5 @@
-import express from 'express';
-import { apiRouter } from '../src/server/api/routes';
-
-const app = express();
-app.use(express.json());
-app.use('/api', apiRouter);
+import { createApp } from '../dist/server.cjs';
 
 export default function handler(req, res) {
-  app(req, res);
+  createApp()(req, res);
 }
