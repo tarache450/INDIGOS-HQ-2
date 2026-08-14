@@ -1,56 +1,43 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { apiRouter } from './src/server/api/routes';
 
-// ─── createApp ────────────────────────────────────────────────────────────────
-// Factory that returns an Express app with /api routes mounted.
-// In production, also serves the static dist/ build so the SPA loads.
-export function createApp() {
-  const app = express();
-  app.use(express.json());
+// ─── Express app singleton ────────────────────────────────────────────────────
+// En Vercel serverless cada invocación recibe su propio require,
+// pero dentro de una misma instancia caliente el módulo se reutiliza.
+// Aquí creamos la app una sola vez por ejecución.
 
-  // Mount API routes — in production the esbuild bundle already has them
-  let apiRouter;
-  try {
-    const bundled = require('../dist/server.cjs');
-    if (typeof bundled.createApp === 'function') {
-      return bundled.createApp();
-    }
-    apiRouter = bundled.apiRouter;
-  } catch {
-    apiRouter = require('./src/server/api/routes').apiRouter;
-  }
+const app = express();
+app.use(express.json());
+app.use('/api', apiRouter);
 
-  app.use('/api', apiRouter);
-
-  const distPath = path.join(process.cwd(), 'dist');
-  if (process.env.NODE_ENV === 'production' && fs.existsSync(distPath)) {
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
-  return app;
+// SPA estático en producción
+const distPath = path.join(process.cwd(), 'dist');
+if (process.env.NODE_ENV === 'production' && fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  // Catch-all SPA: cualquier ruta que no sea un fichero → index.html
+  app.get('*', (req, res) => {
+    // Si es una petición API, Express ya la manejó antes del catch-all
+    if (req.url.startsWith('/api/')) return;
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
 }
 
-// ─── Vercel serverless handler ────────────────────────────────────────────────
-// Vercel calls this default export for every request routed to server.ts
-export default function vercelHandler(req, res) {
-  const app = createApp();
+// ─── Handler por defecto (Vercel llama a esto) ────────────────────────────────
+export default function handler(req, res) {
   app(req, res);
 }
 
-// ─── Standalone entry (local dev / STANDALONE=1) ─────────────────────────────
+// ─── Modo standalone (dev local) ───────────────────────────────────────────────
 const isStandalone =
   process.env.STANDALONE === 'true' ||
   !process.env.VERCEL ||
   process.env.NODE_ENV !== 'production';
 
 if (isStandalone) {
-  const app = createApp();
-
   const start = async () => {
+    // Vite middleware solo en dev (no en prod standalone)
     if (process.env.NODE_ENV !== 'production') {
       const { createServer: createViteServer } = await import('vite');
       const vite = await createViteServer({
