@@ -3,10 +3,13 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "builds": [
-    { "src": "api/index.ts", "use": "@vercel/node" }
+    { "src": "api/index.ts", "use": "@vercel/node" },
+    { "src": "dist/index.html", "use": "@vercel/static" },
+    { "src": "dist/assets/*", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.ts" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
     { "src": "/(.*)", "dest": "/dist/index.html", "headers": { "Content-Type": "text/html" } }
   ]
 }
