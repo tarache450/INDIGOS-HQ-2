@@ -7,6 +7,6 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.ts" },
-    { "src": "/(.*)", "dest": "/index.html", "headers": { "Content-Type": "text/html" } }
+    { "src": "/(.*)", "dest": "/dist/index.html", "headers": { "Content-Type": "text/html" } }
   ]
 }
