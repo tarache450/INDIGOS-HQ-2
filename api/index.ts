@@ -1,4 +1,5 @@
-import express, { Router, Request, Response } from 'express';
+import express from 'express';
+const { Router, Request, Response } = express;
 
 // ============================================================
 // STATIC TYPES (self-contained, no ../src imports)
@@ -759,6 +760,10 @@ apiRouter.get('/ai/knowledge', (_req: Request, res: Response) => res.json(indigo
 // HANDLER
 // ============================================================
 
+const handlerApp = express();
+handlerApp.use(express.json());
+handlerApp.use('/api', apiRouter);
+
 export default function handler(req: Request, res: Response) {
-  apiRouter(req, res);
+  handlerApp(req, res);
 }
